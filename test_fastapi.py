@@ -15,6 +15,7 @@ LANGFLOW_URL = (os.getenv("LANGFLOW_URL") or "http://127.0.0.1:7860").rstrip("/"
 LANGFLOW_FLOW_ID = os.getenv("LANGFLOW_FLOW_ID") or ""
 LANGFLOW_API_KEY = os.getenv("LANGFLOW_API_KEY") or ""
 
+
 LANGFLOW_INPUT_TYPE = os.getenv("LANGFLOW_INPUT_TYPE") or "chat"
 LANGFLOW_OUTPUT_TYPE = os.getenv("LANGFLOW_OUTPUT_TYPE") or "chat"
 
