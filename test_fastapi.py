@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+import time
 
 # Загружаем переменные из .env (локально). На Railway переменные берутся из Variables.
 load_dotenv()
@@ -67,6 +68,7 @@ async def _shutdown() -> None:
 class MultiplyRequest(BaseModel):
     numbers: List[float] = Field(min_length=2)
     session_id: Optional[str] = None
+    user_id: Optional[str] = "guest" # Добавили поле user_id
 
 
 def _extract_text_from_langflow(resp_json: Dict[str, Any]) -> Optional[str]:
@@ -154,15 +156,24 @@ async def health() -> Dict[str, str]:
 
 @app.post("/multiply")
 async def multiply(req: MultiplyRequest) -> Dict[str, Any]:
+    start_time = time.time()  # Засекаем время начала
+
     input_value = " * ".join(str(x) for x in req.numbers)
+
+    print(f"--- New Request from User: {req.user_id} ---")
 
     resp_json, auth_used = await _run_langflow(
         input_value=input_value,
         session_id=req.session_id or "multiply-session",
     )
 
+    process_time = round(time.time() - start_time, 2)  # Считаем длительность
+    print(f"Calculation finished in {process_time} seconds")
+
     return {
         "input": input_value,
+        "user_id": req.user_id,  # Возвращаем ID в ответе
+        "processing_time_sec": process_time,  # Добавляем время в ответ
         "auth_used": auth_used,
         "result_text": _extract_text_from_langflow(resp_json),
         "raw": resp_json,
